@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Calendário da equipe</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;800&family=Figtree:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef3f6;--card:#fff;--ink:#14303b;--mut:#5d7480;--line:#d3dee4;--acc:#0e6e7e;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1b21;--card:#16262e;--ink:#e6f0f3;--mut:#8fa6b0;--line:#2a3f49;--acc:#4fc0d2}}
+:root[data-theme="dark"]{--bg:#0f1b21;--card:#16262e;--ink:#e6f0f3;--mut:#8fa6b0;--line:#2a3f49;--acc:#4fc0d2}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 Figtree,system-ui,sans-serif}
+main{max-width:1240px;margin:0 auto;padding:20px 16px 48px}
+header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;margin-bottom:14px}
+h1{font:800 clamp(1.8rem,5vw,2.8rem)/1 Fraunces,Georgia,serif;margin:0}
+.yr{display:flex;align-items:center;gap:8px}
+.yr input{width:100px;font:800 1.6rem Fraunces,Georgia,serif;text-align:center;color:var(--ink);background:var(--card);border:2px solid var(--line);border-radius:10px;padding:4px}
+button,select,input{font:inherit;color:var(--ink)}
+.btn{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 14px;cursor:pointer}
+.btn:hover{border-color:var(--acc)}
+.btn.p{background:var(--acc);border-color:var(--acc);color:#fff}
+:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+.tools select{padding:8px;border:1px solid var(--line);border-radius:10px;background:var(--card);max-width:100%}
+.leg{display:flex;flex-wrap:wrap;gap:6px 16px;color:var(--mut);font-size:.88rem;margin-bottom:18px;align-items:center}
+.leg label{display:flex;align-items:center;gap:5px}
+.leg input[type=color]{width:24px;height:24px;padding:0;border:1px solid var(--line);border-radius:6px;background:none;cursor:pointer}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:16px}
+.m{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}
+.m h2{font:600 1.15rem Fraunces,Georgia,serif;margin:0 0 8px}
+.w,.d{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;text-align:center}
+.w span{font-size:.75rem;color:var(--mut)}
+.d button{min-height:76px;border:1px solid transparent;border-radius:8px;background:transparent;cursor:pointer;position:relative;font-size:.88rem;padding:3px 3px 4px;display:flex;flex-direction:column;justify-content:space-between;align-items:center;gap:2px}
+.d button:hover{border-color:var(--acc)}
+.d button.we{background:rgba(128,128,128,.1)}
+.d button.t{box-shadow:inset 0 0 0 2px var(--acc)}
+.d button.h span{font-weight:800}
+.d em{display:grid;gap:2px;width:100%}
+.d s{display:block;height:14px;line-height:14px;border-radius:4px;background:rgba(128,128,128,.18);color:#fff;font-size:.56rem;font-weight:600;text-align:center;overflow:hidden;white-space:nowrap;text-decoration:none}
+.d i{position:absolute;right:3px;top:2px;width:5px;height:5px;border-radius:50%;background:var(--ink);opacity:.55}
+dialog{border:0;border-radius:16px;padding:20px;width:min(480px,94vw);background:var(--card);color:var(--ink)}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+dialog h3{font:600 1.3rem Fraunces,Georgia,serif;margin:0 0 10px;text-transform:capitalize}
+.pr{margin:10px 0}
+.pr>b{display:block;margin-bottom:4px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:2px solid var(--c,var(--line));border-radius:999px;padding:3px 10px;background:transparent;cursor:pointer;font-size:.85rem}
+.chip.on{background:var(--c,var(--ink));color:#fff;border-color:var(--c,var(--ink))}
+.f{display:grid;gap:8px;margin-top:10px}
+.f input[type=text],.f input[type=date]{width:100%;padding:9px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.f label{font-size:.85rem;color:var(--mut)}
+.ck{display:flex;align-items:center;gap:8px;color:var(--ink)!important;font-size:1rem!important}
+.row{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.lista{margin-top:28px}
+.lista h2{font:600 1.4rem Fraunces,Georgia,serif}
+.it{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:6px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.it .dt{width:56px;color:var(--mut);flex:none}
+.tag{border-radius:999px;color:#fff;font-size:.78rem;padding:1px 9px}
+.vazio{color:var(--mut)}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+</head>
+<body>
+<main>
+<header>
+  <h1>Calendário da equipe</h1>
+  <div class="yr">
+    <button class="btn" id="prev" aria-label="Ano anterior">◀</button>
+    <input id="ano" type="number" min="1900" max="2200" aria-label="Ano">
+    <button class="btn" id="next" aria-label="Próximo ano">▶</button>
+    <button class="btn" id="hoje">Hoje</button>
+  </div>
+</header>
+<div class="tools">
+  <select id="pincel" aria-label="Pincel de cor"></select>
+  <button class="btn p" id="feriados">Adicionar feriados (nacionais, Paraíba e João Pessoa)</button>
+  <button class="btn" id="xlsx">Exportar para Excel</button>
+  <span id="st" class="vazio" role="status" aria-live="polite"></span>
+</div>
+<div class="leg" id="leg"></div>
+<div class="grid" id="grid"></div>
+<section class="lista"><h2>Registros do ano</h2><div id="lista"></div></section>
+</main>
+
+<dialog id="dlg">
+  <h3 id="dt"></h3>
+  <div id="corpo"></div>
+  <div class="f">
+    <label class="ck"><input type="checkbox" id="fer"> Feriado</label>
+    <input type="text" id="fnome" maxlength="60" placeholder="Nome do feriado (opcional)">
+    <label>Observação<input type="text" id="obs" maxlength="100"></label>
+    <label>Aplicar também até o dia (opcional, para férias e períodos)<input type="date" id="ate"></label>
+    <div class="row"><button class="btn" id="limpar">Limpar dia</button><button class="btn" id="fechar">Cancelar</button><button class="btn p" id="salvar">Salvar</button></div>
+  </div>
+</dialog>
+
+<script>
+const PES=[['L','Leonildo (PDG)'],['D','Daniela'],['J','Júnior']];
+const ST={p:'Presencial',t:'Teletrabalho',a:'Atestado',f:'Férias'};
+const MESES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const SEM=['D','S','T','Q','Q','S','S'];
+let COR={p:'#2e9e5b',t:'#3f7de0',a:'#8a5cd6',f:'#f2a33a',h:'#d9485f'};
+let notas={};
+try{notas=JSON.parse(localStorage.getItem('calendario-v2')||'{}')}catch(e){}
+try{Object.assign(COR,JSON.parse(localStorage.getItem('calendario-cores')||'{}'))}catch(e){}
+/* ===== Sincronização com o servidor (Netlify Function + Blobs) ===== */
+const API='/api/calendario';
+let servidor={notas:{},cores:{}}, fila={dias:{},cores:null}, enviando=false;
+let codigo='';try{codigo=localStorage.getItem('calendario-codigo')||''}catch(e){}
+const clone=o=>JSON.parse(JSON.stringify(o));
+const igual=(a,b)=>JSON.stringify(a===undefined?null:a)===JSON.stringify(b===undefined?null:b);
+const pendente=()=>Object.keys(fila.dias).length>0||!!fila.cores;
+const status=(t,erro)=>{const s=document.getElementById('st');if(s){s.textContent=t;s.style.color=erro?'#d9485f':''}};
+function cache(){try{localStorage.setItem('calendario-v2',JSON.stringify(notas));localStorage.setItem('calendario-cores',JSON.stringify(COR))}catch(e){}}
+function salvar(){
+  cache();
+  new Set([...Object.keys(servidor.notas),...Object.keys(notas)]).forEach(k=>{
+    if(!igual(servidor.notas[k],notas[k])){
+      fila.dias[k]=notas[k]?clone(notas[k]):null;
+      if(notas[k])servidor.notas[k]=clone(notas[k]);else delete servidor.notas[k];
+    }
+  });
+  enviar();
+}
+function salvarCores(){cache();if(!igual(servidor.cores,COR)){fila.cores=clone(COR);servidor.cores=clone(COR)}enviar()}
+async function req(opts){
+  const r=await fetch(API,{...opts,cache:'no-store',headers:{'Content-Type':'application/json','x-codigo':codigo}});
+  if(r.status===401){
+    const c=prompt('Código da equipe:');
+    if(c){codigo=c;try{localStorage.setItem('calendario-codigo',c)}catch(e){}return req(opts)}
+    throw new Error('401');
+  }
+  if(!r.ok)throw new Error(String(r.status));
+  return r.json();
+}
+function aceitar(s){
+  servidor={notas:clone(s.notas||{}),cores:clone(s.cores||{})};
+  const n=clone(servidor.notas);
+  for(const k in fila.dias){const v=fila.dias[k];if(v){n[k]=clone(v);servidor.notas[k]=clone(v)}else{delete n[k];delete servidor.notas[k]}}
+  const corAntes=clone(COR);
+  if(fila.cores){Object.assign(COR,fila.cores);servidor.cores=clone(fila.cores)}else Object.assign(COR,servidor.cores);
+  const mudou=!igual(notas,n)||!igual(corAntes,COR);
+  notas=n;cache();
+  if(mudou&&!$('dlg').open)render();
+}
+async function enviar(){
+  if(enviando||!pendente())return;
+  enviando=true;const lote=fila;fila={dias:{},cores:null};status('Salvando…');
+  let ok=false;
+  try{const s=await req({method:'POST',body:JSON.stringify(lote)});aceitar(s);status('Sincronizado');ok=true}
+  catch(e){
+    for(const k in lote.dias)if(!(k in fila.dias))fila.dias[k]=lote.dias[k];
+    if(lote.cores&&!fila.cores)fila.cores=lote.cores;
+    status('Sem conexão — vou tentar de novo',true);
+  }
+  enviando=false;
+  if(ok&&pendente())enviar();
+}
+async function puxar(){
+  if(enviando||document.hidden)return;
+  if(pendente()){enviar();return}
+  try{const s=await req({method:'GET'});if(enviando||pendente())return;aceitar(s);status('Sincronizado')}
+  catch(e){status('Sem conexão',true)}
+}
+async function iniciar(){
+  status('Carregando…');
+  try{
+    const s=await req({method:'GET'});
+    if(!Object.keys(s.notas||{}).length&&Object.keys(notas).length){
+      /* servidor vazio e este aparelho tem dados: envia como ponto de partida */
+      servidor={notas:{},cores:clone(s.cores||{})};salvar();salvarCores();
+    }else{aceitar(s);status('Sincronizado')}
+  }catch(e){status('Sem conexão — usando dados deste aparelho',true)}
+  setInterval(puxar,8000);
+  document.addEventListener('visibilitychange',puxar);
+  window.addEventListener('online',puxar);
+}
+const p2=n=>String(n).padStart(2,'0');
+const key=(y,m,d)=>y+'-'+p2(m+1)+'-'+p2(d);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const $=id=>document.getElementById(id);
+const hoje=new Date();
+let ano=hoje.getFullYear(), dia=null, draft={}, tocados=new Set();
+
+$('pincel').innerHTML='<option value="">Pincel: nenhum (clicar abre o dia)</option>'+
+  PES.map(([c,n])=>`<optgroup label="${n}">${Object.entries(ST).map(([s,t])=>`<option value="${c}:${s}">${n} — ${t}</option>`).join('')}</optgroup>`).join('')+
+  '<optgroup label="Dia inteiro"><option value="h">Feriado (liga/desliga)</option><option value="x">Limpar dia</option></optgroup>';
+
+function legenda(){
+  $('leg').innerHTML=Object.entries(ST).map(([k,n])=>`<label><input type="color" data-c="${k}" value="${COR[k]}" aria-label="Cor de ${n}">${n}</label>`).join('')+
+   `<label><input type="color" data-c="h" value="${COR.h}" aria-label="Cor do feriado">Feriado</label><span>Faixas de cima para baixo: Leonildo, Daniela, Júnior</span>`;
+}
+$('leg').onchange=e=>{const c=e.target.dataset.c;if(c){COR[c]=e.target.value;salvarCores();render()}};
+
+function limpa(k){const r=notas[k];if(r&&!Object.keys(r).length)delete notas[k]}
+function resumo(r){
+  return PES.filter(([c])=>r[c]).map(([c,n])=>`<span class="tag" style="background:${COR[r[c]]}">${n.split(' ')[0]}: ${ST[r[c]]}</span>`).join('')+
+   (r.h!==undefined?`<span class="tag" style="background:${COR.h}">${esc(r.h)}</span>`:'')+(r.x?`<span>${esc(r.x)}</span>`:'');
+}
+function render(){
+  $('ano').value=ano;legenda();
+  let h='';
+  for(let m=0;m<12;m++){
+    const ini=new Date(ano,m,1).getDay(), n=new Date(ano,m+1,0).getDate();
+    h+=`<div class="m"><h2>${MESES[m]}</h2><div class="w">${SEM.map(s=>`<span>${s}</span>`).join('')}</div><div class="d">`;
+    for(let i=0;i<ini;i++)h+='<span></span>';
+    for(let d=1;d<=n;d++){
+      const k=key(ano,m,d), r=notas[k]||{}, wd=new Date(ano,m,d).getDay();
+      const cl=[wd%6==0?'we':'',(ano==hoje.getFullYear()&&m==hoje.getMonth()&&d==hoje.getDate())?'t':'',r.h!==undefined?'h':''].join(' ');
+      const bg=r.h!==undefined?`background:${COR.h}33;`:'';
+      const tip=PES.filter(([c])=>r[c]).map(([c,nm])=>nm+': '+ST[r[c]]).concat(r.h!==undefined?[r.h]:[],r.x?[r.x]:[]).join(' | ');
+      h+=`<button class="${cl}" style="${bg}" data-k="${k}" title="${esc(tip)}"><span style="${r.h!==undefined?'color:'+COR.h:''}">${d}</span><em>${PES.map(([c,nm])=>`<s${r[c]?` style="background:${COR[r[c]]}"`:''}>${r[c]?nm.split(' ')[0]:''}</s>`).join('')}</em>${r.x?'<i></i>':''}</button>`;
+    }
+    h+='</div></div>';
+  }
+  $('grid').innerHTML=h;
+  const ks=Object.keys(notas).filter(k=>k.startsWith(ano+'-')&&Object.keys(notas[k]).length).sort();
+  $('lista').innerHTML=ks.length?ks.map(k=>`<div class="it" data-k="${k}"><span class="dt">${k.slice(8)}/${k.slice(5,7)}</span>${resumo(notas[k])}</div>`).join(''):'<p class="vazio">Nenhum registro neste ano. Escolha um pincel ou clique em um dia.</p>';
+}
+
+function aplicar(k,b){
+  if(b=='x'){delete notas[k];return}
+  const r=notas[k]=notas[k]||{};
+  if(b=='h'){r.h!==undefined?delete r.h:r.h='Feriado'}
+  else{const [c,s]=b.split(':');r[c]===s?delete r[c]:r[c]=s}
+  limpa(k);
+}
+$('grid').onclick=e=>{
+  const b=e.target.closest('button[data-k]');if(!b)return;
+  const br=$('pincel').value;
+  if(br){aplicar(b.dataset.k,br);salvar();render()}else abrir(b.dataset.k);
+};
+$('lista').onclick=e=>{const b=e.target.closest('[data-k]');if(b)abrir(b.dataset.k)};
+
+function pessoas(){
+  $('corpo').innerHTML=PES.map(([c,n])=>`<div class="pr"><b>${n}</b><div class="chips">`+
+   `<button class="chip ${!draft[c]?'on':''}" data-c="${c}" data-s="">Nenhum</button>`+
+   Object.entries(ST).map(([s,t])=>`<button class="chip ${draft[c]==s?'on':''}" style="--c:${COR[s]}" data-c="${c}" data-s="${s}">${t}</button>`).join('')+
+   '</div></div>').join('');
+}
+$('corpo').onclick=e=>{
+  const b=e.target.closest('.chip');if(!b)return;
+  const c=b.dataset.c,s=b.dataset.s;
+  if(s)draft[c]=s;else delete draft[c];
+  tocados.add(c);pessoas();
+};
+function abrir(k){
+  dia=k;draft={...(notas[k]||{})};tocados=new Set();
+  const [y,m,d]=k.split('-').map(Number);
+  $('dt').textContent=new Date(y,m-1,d).toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  $('fer').checked=draft.h!==undefined;
+  $('fnome').value=draft.h&&draft.h!=='Feriado'?draft.h:'';
+  $('obs').value=draft.x||'';
+  $('ate').min=k;$('ate').value='';
+  pessoas();$('dlg').showModal();
+}
+function atualizaFeriado(){
+  if($('fer').checked)draft.h=$('fnome').value.trim()||'Feriado';else delete draft.h;
+  tocados.add('h');
+}
+$('fer').onchange=atualizaFeriado;
+$('fnome').oninput=()=>{if($('fer').checked)atualizaFeriado()};
+$('obs').oninput=()=>{draft.x=$('obs').value.trim();tocados.add('x')};
+$('salvar').onclick=()=>{
+  const [y,m,d]=dia.split('-').map(Number);
+  const a=new Date(y,m-1,d);let z=$('ate').value?new Date($('ate').value+'T00:00:00'):a;if(z<a)z=a;
+  for(const c=new Date(a);c<=z;c.setDate(c.getDate()+1)){
+    const k=key(c.getFullYear(),c.getMonth(),c.getDate()),r=notas[k]||{};
+    tocados.forEach(f=>{draft[f]===undefined||draft[f]===''?delete r[f]:r[f]=draft[f]});
+    notas[k]=r;limpa(k);
+  }
+  salvar();render();$('dlg').close();
+};
+$('limpar').onclick=()=>{delete notas[dia];salvar();render();$('dlg').close()};
+$('fechar').onclick=()=>$('dlg').close();
+$('dlg').addEventListener('click',e=>{if(e.target==$('dlg'))$('dlg').close()});
+
+function feriadosBR(y){
+  const L=[[0,1,'Confraternização Universal'],[3,21,'Tiradentes'],[4,1,'Dia do Trabalho'],[8,7,'Independência do Brasil'],[9,12,'Nossa Sra. Aparecida'],[10,2,'Finados'],[10,15,'Proclamação da República'],[10,20,'Consciência Negra'],[11,25,'Natal'],[7,5,'Fundação da Paraíba / N. Sra. das Neves (aniversário de João Pessoa)'],[5,24,'São João (João Pessoa)'],[11,8,'Imaculada Conceição (João Pessoa)']].map(([m,d,n])=>[new Date(y,m,d),n]);
+  const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,mm=Math.floor((a+11*h+22*l)/451),mes=Math.floor((h+l-7*mm+114)/31),di=((h+l-7*mm+114)%31)+1;
+  const off=n=>new Date(y,mes-1,di+n);
+  L.push([off(-48),'Carnaval'],[off(-47),'Carnaval'],[off(-2),'Sexta-feira Santa'],[off(0),'Páscoa'],[off(60),'Corpus Christi']);
+  return L;
+}
+$('feriados').onclick=()=>{
+  feriadosBR(ano).forEach(([dt,n])=>{const k=key(dt.getFullYear(),dt.getMonth(),dt.getDate());(notas[k]=notas[k]||{}).h=n});
+  salvar();render();
+};
+
+const argb=h=>'FF'+h.slice(1).toUpperCase();
+const pinta=(cell,hex,txt)=>{cell.value=txt;cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:argb(hex)}};cell.font={bold:true,color:{argb:'FFFFFFFF'}};cell.alignment={horizontal:'center'}};
+const SIG={p:'P',t:'T',a:'At',f:'F'};
+$('xlsx').onclick=async()=>{
+  if(!window.ExcelJS){alert('A biblioteca do Excel não carregou. Recarregue a página.');return}
+  const wb=new ExcelJS.Workbook();
+  const w1=wb.addWorksheet('Registro '+ano);
+  w1.columns=[{header:'Data',width:12},{header:'Dia da semana',width:16},{header:'Feriado',width:26},...PES.map(([c,n])=>({header:n,width:18})),{header:'Observação',width:36}];
+  w1.getRow(1).font={bold:true};
+  Object.keys(notas).filter(k=>k.startsWith(ano+'-')&&Object.keys(notas[k]).length).sort().forEach(k=>{
+    const [y,m,d]=k.split('-').map(Number),r=notas[k];
+    const row=w1.addRow([p2(d)+'/'+p2(m)+'/'+y,new Date(y,m-1,d).toLocaleDateString('pt-BR',{weekday:'long'}),r.h||'',...PES.map(([c])=>''),r.x||'']);
+    if(r.h!==undefined)pinta(row.getCell(3),COR.h,r.h);
+    PES.forEach(([c],i)=>{if(r[c])pinta(row.getCell(4+i),COR[r[c]],ST[r[c]])});
+  });
+  const w2=wb.addWorksheet('Calendário '+ano);
+  w2.getColumn(1).width=6;
+  w2.mergeCells(1,1,2,1);w2.getCell(1,1).value='Dia';
+  for(let m=0;m<12;m++){
+    w2.mergeCells(1,2+3*m,1,4+3*m);
+    const hc=w2.getCell(1,2+3*m);hc.value=MESES[m];hc.alignment={horizontal:'center'};hc.font={bold:true};
+    PES.forEach(([c,n],i)=>{const cc=w2.getCell(2,2+3*m+i);cc.value=n.split(' ')[0];cc.alignment={horizontal:'center'};cc.font={bold:true};w2.getColumn(2+3*m+i).width=11});
+  }
+  for(let d=1;d<=31;d++){
+    w2.getCell(2+d,1).value=d;
+    for(let m=0;m<12;m++){
+      const n=new Date(ano,m+1,0).getDate();
+      for(let i=0;i<3;i++){
+        const cell=w2.getCell(2+d,2+3*m+i);
+        if(d>n){cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFBFBFBF'}};continue}
+        const r=notas[key(ano,m,d)]||{},c=PES[i][0],wd=new Date(ano,m,d).getDay();
+        if(r[c])pinta(cell,COR[r[c]],PES[i][1].split(' ')[0]);
+        else if(r.h!==undefined)pinta(cell,COR.h,'Fer');
+        else if(wd%6==0)cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFEDEDED'}};
+      }
+    }
+  }
+  let ln=36;
+  w2.getCell(ln,1).value='Legenda';w2.getCell(ln,1).font={bold:true};
+  [...Object.entries(ST).map(([s,t])=>[COR[s],SIG[s],t]),[COR.h,'Fer','Feriado']].forEach(([hx,sg,t],i)=>{
+    pinta(w2.getCell(ln+1+i,2),hx,'');w2.getCell(ln+1+i,3).value=t;
+  });
+  w2.getCell(ln+7,1).value='Colunas de cada mês: Leonildo, Daniela e Júnior (a cor mostra o status)';
+  w2.views=[{state:'frozen',xSplit:1,ySplit:2}];
+  const buf=await wb.xlsx.writeBuffer();
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));a.download='calendario-'+ano+'.xlsx';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+};
+$('prev').onclick=()=>{ano--;render()};
+$('next').onclick=()=>{ano++;render()};
+$('hoje').onclick=()=>{ano=hoje.getFullYear();render()};
+$('ano').onchange=()=>{const v=parseInt($('ano').value,10);if(v>=1900&&v<=2200)ano=v;render()};
+render();
+iniciar();
+</script>
+</body>
+</html>
