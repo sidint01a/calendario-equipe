@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Calendário da equipe</title>
-<link href="https://googleapis.com" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;800&family=Figtree:wght@400;600&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#eef3f6;--card:#fff;--ink:#14303b;--mut:#5d7480;--line:#d3dee4;--acc:#0e6e7e;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -61,7 +61,7 @@ dialog h3{font:600 1.3rem Fraunces,Georgia,serif;margin:0 0 10px;text-transform:
 .tag{border-radius:999px;color:#fff;font-size:.78rem;padding:1px 9px}
 .vazio{color:var(--mut)}
 </style>
-<script src="https://jsdelivr.net"></script>
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
 <script src="https://gstatic.com"></script>
 <script src="https://gstatic.com"></script>
 </head>
@@ -80,6 +80,7 @@ dialog h3{font:600 1.3rem Fraunces,Georgia,serif;margin:0 0 10px;text-transform:
   <select id="pincel" aria-label="Pincel de cor"></select>
   <button class="btn p" id="feriados">Adicionar feriados (nacionais, Paraíba e João Pessoa)</button>
   <button class="btn" id="xlsx">Exportar para Excel</button>
+  <span id="st" class="vazio" role="status" aria-live="polite"></span>
 </div>
 <div class="leg" id="leg"></div>
 <div class="grid" id="grid"></div>
@@ -131,23 +132,44 @@ $('pincel').innerHTML='<option value="">Pincel: nenhum (clicar abre o dia)</opti
   PES.map(([c,n])=>`<optgroup label="${n}">${Object.entries(ST).map(([s,t])=>`<option value="${c}:${s}">${n} — ${t}</option>`).join('')}</optgroup>`).join('')+
   '<optgroup label="Dia inteiro"><option value="h">Feriado (liga/desliga)</option><option value="x">Limpar dia</option></optgroup>';
 
+function status(texto, erro) {
+  const s = $('st');
+  if (s) {
+    s.textContent = texto;
+    s.style.color = erro ? '#d9485f' : '';
+  }
+}
+
 function legenda(){
   $('leg').innerHTML=Object.entries(ST).map(([k,n])=>`<label><input type="color" data-c="${k}" value="${COR[k]}" aria-label="Cor de ${n}">${n}</label>`).join('')+
    `<label><input type="color" data-c="h" value="${COR.h}" aria-label="Cor do feriado">Feriado</label><span>Faixas de cima para baixo: Leonildo, Daniela, Júnior</span>`;
 }
 legenda();
 
-$('leg').onchange=e=>{const c=e.target.dataset.c;if(c){COR[c]=e.target.value;db.collection("config").doc("cores").set(COR);}};
+$('leg').onchange=e=>{
+  const c=e.target.dataset.c;
+  if(c){
+    COR[c]=e.target.value;
+    status('Salvando cores...', false);
+    db.collection("config").doc("cores").set(COR)
+      .then(() => status('Sincronizado', false))
+      .catch(() => status('Erro ao salvar', true));
+  }
+};
 
 db.collection("config").doc("cores").onSnapshot((doc) => {
   if(doc.exists) { COR = doc.data(); legenda(); render(); }
 });
 
+status('Carregando...', false);
 db.collection("calendario").onSnapshot((snapshot) => {
   notas = {};
   snapshot.forEach((doc) => { notas[doc.id] = doc.data(); });
+  status('Sincronizado', false);
   render();
   renderLista();
+}, (error) => {
+  status('Sem conexão — usando dados deste aparelho', true);
 });
 
 function render(){
@@ -167,19 +189,3 @@ function render(){
       if(ano===hoje.getFullYear()&&m===hoje.getMonth()&&d===hoje.getDate()) cls.push('t');
       
       let ests='';
-      PES.forEach(([c])=>{ if(n[c]) ests+=`<s style="background:${COR[n[c]]}">${ST[n[c]]}</s>`; });
-      
-      let styleF = n.fer ? `style="background-color:${COR.h}22"` : '';
-      html+=`<button ${styleF} class="${cls.join(' ')}" onclick="cliqueDia('${k}')"><span>${d}</span><em>${ests}</em>${n.obs?'<i></i>':''}</button>`;
-    }
-    html+='</div></div>';
-  }
-  $('grid').innerHTML=html;
-}
-
-window.cliqueDia=(k)=>{
-  const pincel=$('pincel').value;
-  if(pincel){
-    let n=JSON.parse(JSON.stringify(notas[k]||{}));
-    if(pincel==='x'){
-      db.collection("calendario").doc(k).delete();
